@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+// 1. ข้อมูลการเลือกตั้งแต่ละปี
+model Election {
+  id        String   @id @default(uuid())
+  year      Int      @unique // เช่น 2026
+  title     String // เช่น "การเลือกตั้งคณะกรรมการดำเนินการ ปี 2569"
+  startTime DateTime // วัน-เวลาเปิดโหวต
+  endTime   DateTime // วัน-เวลาปิดโหวต
+  maxVotes  Int // จำนวนที่เลือกได้สูงสุด (เช่น 7 คน)
+  isActive  Boolean  @default(true) // สถานะเปิด/ปิดใช้งาน
+
+  // Relations
+  candidates Candidate[]
+  voters     MemberVoteStatus[]
+  tallies    VoteTally[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. ข้อมูลสมาชิกสหกรณ์
+model Member {
+  id               String @id @default(uuid())
+  memberCode       String @unique @db.VarChar(6) // เลขทะเบียน 6 หลัก (Index เพื่อการค้นหาที่เร็ว)
+  hashedNationalId String @db.VarChar(255) // เลขบัตร ปชช. ที่ผ่านการ Hash แล้ว (ห้ามเก็บ plain text)
+
+  // Relations
+  voteHistory MemberVoteStatus[]
+
+  createdAt DateTime @default(now())
+}
+
+// 3. ข้อมูลผู้สมัคร (รวมถึง "ไม่ประสงค์ลงคะแนน")
+model Candidate {
+  id              String  @id @default(uuid())
+  electionId      String
+  candidateNumber Int? // หมายเลขผู้สมัคร (null ได้ถ้าเป็นตัวเลือก "ไม่ประสงค์ลงคะแนน")
+  firstName       String? @db.VarChar(100)
+  lastName        String? @db.VarChar(100)
+  imageUrl        String? @db.Text // URL รูปภาพ
+
+  // ใช้แยกตัวเลือกปกติ กับ ตัวเลือก "ไม่ประสงค์ลงคะแนน"
+  isAbstain Boolean @default(false)
+
+  // Relations
+  election Election   @relation(fields: [electionId], references: [id])
+  tally    VoteTally?
+
+  createdAt DateTime @default(now())
+
+  @@index([electionId])
+}
+
+// 4. สถานะการลงคะแนนของสมาชิก (เก็บแค่ว่าโหวตแล้ว แต่ไม่รู้ว่าโหวตใคร)
+model MemberVoteStatus {
+  id         String   @id @default(uuid())
+  memberId   String
+  electionId String
+  votedAt    DateTime @default(now()) // เวลาที่กดส่งคะแนน
+  ipAddress  String?  @db.VarChar(45) // เก็บ IP ไว้ Audit กรณีโดนโจมตี
+  userAgent  String?  @db.Text // เก็บข้อมูล Device/Browser
+
+  // Relations
+  member   Member   @relation(fields: [memberId], references: [id])
+  election Election @relation(fields: [electionId], references: [id])
+
+  // ป้องกันการโหวตซ้ำ: 1 สมาชิก โหวตได้ 1 ครั้งต่อ 1 การเลือกตั้ง
+  @@unique([memberId, electionId])
+}
+
+// 5. ตารางสรุปผลคะแนนดิบ (บวกเพิ่มทีละ 1)
+model VoteTally {
+  id          String @id @default(uuid())
+  electionId  String
+  candidateId String @unique // 1 ผู้สมัคร มี 1 Tally record ในปีนั้นๆ
+  totalVotes  Int    @default(0) // คะแนนรวม
+
+  // Relations
+  election  Election  @relation(fields: [electionId], references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  updatedAt DateTime @updatedAt
+
+  @@index([electionId])
+}

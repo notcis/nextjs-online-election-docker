@@ -48,9 +48,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
 # Copy prisma schema (สำหรับ migration)
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Copy Prisma binary (สำคัญมาก!)
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 

@@ -48,7 +48,6 @@ RUN \
 
 # Copy build output and necessary files
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/server.js ./server.js
 
 # **สำคัญ: Copy generated Prisma folder**
 COPY --from=builder /app/generated ./generated
@@ -65,4 +64,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

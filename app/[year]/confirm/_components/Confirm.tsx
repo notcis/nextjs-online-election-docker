@@ -23,10 +23,10 @@ export default function Confirm({ year }: { year: string }) {
 
   // Guard: ตรวจสอบว่ามีข้อมูลการเลือกตั้งหรือไม่ (ถ้าไม่มีให้เด้งกลับหน้าโหวต)
   useEffect(() => {
-    if (!state.memberId) {
+    /* if (!state.memberId) {
       router.push(`/${year}`);
       return;
-    }
+    } */
     if (state.selectedCandidates.length === 0 && !state.isAbstain) {
       router.push(`/${year}/vote`);
     }

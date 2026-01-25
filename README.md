@@ -42,3 +42,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 3. npx prisma generate
 4. npx prisma migrate dev --name add-auth-models
 5. npx prisma generate
+
+http://localhost:3000/2026?token=05273f063f6457c1dcf78a61526b24a1:75531945ed5444aa394ea5c0b585aa85

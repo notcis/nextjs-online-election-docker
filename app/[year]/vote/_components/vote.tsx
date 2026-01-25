@@ -29,11 +29,11 @@ export default function Vote({ year }: { year: string }) {
   // ดึงข้อมูลผู้สมัครจาก Server Action เมื่อโหลดหน้า
   useEffect(() => {
     // ป้องกันการเข้าหน้านี้โดยไม่ได้ Login (ไม่มี memberId)
-    if (!state.memberId) {
+    /* if (!state.memberId) {
       router.push(`/${year}`);
       return;
     }
-
+ */
     const fetchData = async () => {
       setIsLoading(true);
       const yearInt = parseInt(year);

@@ -98,10 +98,22 @@ model Member {
   memberCode       String @unique @db.VarChar(6) // เลขทะเบียน 6 หลัก (Index เพื่อการค้นหาที่เร็ว)
   hashedNationalId String @db.VarChar(255) // เลขบัตร ปชช. ที่ผ่านการ Hash แล้ว (ห้ามเก็บ plain text)
 
+  age        Int // อายุ
+  region     String  @db.VarChar(50) // ภาค (เช่น กลาง, เหนือ, ใต้, ตะวันออก, ตะวันตก, อีสาน)
+  isEligible Boolean @default(true) // มีสิทธิ์เลือกตั้งหรือไม่
+
   // Relations
   voteHistory MemberVoteStatus[]
 
   createdAt DateTime @default(now())
+}
+
+// ตารางสำหรับตั้งค่าระบบหลังบ้าน (มีแถวเดียวเสมอ)
+model SystemSetting {
+  id                String   @id @default("global-settings")
+  isSystemActive    Boolean  @default(true) // สวิตช์เปิด/ปิดระบบใหญ่ (Master Switch)
+  totalMembersCount Int      @default(0) // จำนวนสมาชิกทั้งหมด (กรอกเอง)
+  updatedAt         DateTime @updatedAt
 }
 
 // 3. ข้อมูลผู้สมัคร (รวมถึง "ไม่ประสงค์ลงคะแนน")

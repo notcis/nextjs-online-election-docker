@@ -23,6 +23,7 @@ export function proxy(request: NextRequest) {
     const year = yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
 
     // เตะกลับไปหน้าแรก (หน้า Landing) เพื่อให้ไปยืนยันตัวตนก่อน
+    //return NextResponse.redirect(new URL(`/${year}`, request.url));
     return NextResponse.redirect(new URL(`/${year}`, request.url));
   }
 

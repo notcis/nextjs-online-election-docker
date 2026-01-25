@@ -78,12 +78,12 @@ export default function Success({ year }: { year: string }) {
 
         {/* e-Receipt Card */}
         <Card className="w-full border-0 shadow-md bg-white overflow-hidden mb-6">
-          <div className="bg-primary px-4 py-3 flex items-center justify-between text-white">
+          {/* <div className="bg-primary px-4 py-3 flex items-center justify-between text-white">
             <div className="flex items-center gap-2 font-bold text-sm">
               <Receipt className="w-4 h-4" />
               <span>หลักฐานการลงคะแนน (e-Receipt)</span>
             </div>
-          </div>
+          </div> */}
           <CardContent className="p-0 text-sm">
             <div className="p-4 border-b border-dashed">
               <div className="flex justify-between mb-2">

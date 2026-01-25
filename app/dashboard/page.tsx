@@ -1,118 +1,402 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Users,
-  DoorOpen,
-  Banknote,
-  AlertCircle,
+  Vote,
+  CheckCircle2,
+  Clock,
+  Crown,
   TrendingUp,
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-export default async function DashboardPage() {
-  // TODO: Fetch real data from Prisma here
-  // const totalRooms = await prisma.room.count()
-  // ...
+// นำเข้า Recharts
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+
+// --------------------------------------------------------------------
+// ข้อมูลจำลอง (Mock Data) - ของจริงจะดึงผ่าน SWR หรือ Server Action
+// --------------------------------------------------------------------
+const trafficData = [
+  { time: "07:00", votes: 120 },
+  { time: "08:00", votes: 450 },
+  { time: "09:00", votes: 980 },
+  { time: "10:00", votes: 1200 },
+  { time: "11:00", votes: 800 },
+  { time: "12:00", votes: 650 },
+];
+
+const regionData = [
+  { name: "ภาคกลาง", value: 45 },
+  { name: "ภาคเหนือ", value: 25 },
+  { name: "ภาคอีสาน", value: 20 },
+  { name: "ภาคใต้", value: 10 },
+];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+const ageData = [
+  { age: "20-30 ปี", votes: 350 },
+  { age: "31-45 ปี", votes: 1250 },
+  { age: "46-60 ปี", votes: 980 },
+  { age: "60+ ปี", votes: 420 },
+];
+
+const liveResults = [
+  {
+    id: 1,
+    name: "สมชาย รักสหกรณ์",
+    no: 1,
+    votes: 2150,
+    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Somchai",
+  },
+  {
+    id: 2,
+    name: "สมหญิง ออมทรัพย์",
+    no: 2,
+    votes: 1850,
+    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Somying",
+  },
+  {
+    id: 3,
+    name: "ประเสริฐ พัฒนา",
+    no: 3,
+    votes: 1650,
+    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Prasert",
+  },
+  {
+    id: 4,
+    name: "วันดี มั่นคง",
+    no: 4,
+    votes: 1200,
+    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Wandee",
+  },
+];
+const abstainResult = { votes: 150 };
+const totalVotes = 3000;
+
+// --------------------------------------------------------------------
+
+export default function DashboardPage() {
+  // Initialize mounted to true directly as this is a client component
+  // and Recharts expects to be rendered on the client.
+  const [mounted] = useState(true);
+  if (!mounted) return null;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">ภาพรวม</h2>
-        {/* ปุ่ม Action เร่งด่วน (ถ้ามี) */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800">
+            ภาพรวมระบบ (Dashboard)
+          </h1>
+          <p className="text-slate-500 text-sm">
+            การเลือกตั้งคณะกรรมการดำเนินการ ปี 2569
+          </p>
+        </div>
+        <Badge
+          variant="secondary"
+          className="px-3 py-1 font-mono text-sm shadow-sm bg-white border border-slate-200"
+        >
+          <Clock className="w-4 h-4 mr-2 text-slate-400" />
+          เหลือเวลา:{" "}
+          <span className="text-primary font-bold ml-1">04:25:12</span>
+        </Badge>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              รายรับเดือนนี้
+      {/* --- Row 1: Summary Cards --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="ผู้มาใช้สิทธิ์ (คน)"
+          value={3000}
+          percent={45.4}
+          icon={Vote}
+          color="text-green-600"
+          bg="bg-green-100"
+        />
+        <StatCard
+          title="ผู้มีสิทธิ์เลือกตั้ง"
+          value={6600}
+          icon={UserCheck}
+          color="text-blue-600"
+          bg="bg-blue-100"
+        />
+        <StatCard
+          title="สมาชิกทั้งหมด"
+          value={12000}
+          icon={Users}
+          color="text-purple-600"
+          bg="bg-purple-100"
+        />
+        <StatCard
+          title="สถานะเซิร์ฟเวอร์"
+          value="ปกติ"
+          subValue="โหลด: 12%"
+          icon={CheckCircle2}
+          color="text-amber-600"
+          bg="bg-amber-100"
+        />
+      </div>
+
+      {/* --- Row 2: Charts (Traffic & Region) --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* กราฟเส้น: Traffic */}
+        <Card className="lg:col-span-2 shadow-sm border-slate-100">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold flex items-center">
+              <TrendingUp className="w-4 h-4 mr-2 text-primary" />
+              แนวโน้มผู้มาลงคะแนนรายชั่วโมง
             </CardTitle>
-            <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">฿124,500</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% จากเดือนที่แล้ว
-            </p>
+          <CardContent className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trafficData}>
+                <XAxis
+                  dataKey="time"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="votes"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ห้องว่าง</CardTitle>
-            <DoorOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4 / 40</div>
-            <p className="text-xs text-muted-foreground">อัตราการเข้าพัก 90%</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ยอดค้างชำระ</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">฿8,400</div>
-            <p className="text-xs text-muted-foreground">จาก 3 ห้อง</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              สัญญาจะหมดอายุ
+        {/* กราฟวงกลม: แยกตามภาค */}
+        <Card className="shadow-sm border-slate-100">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base font-bold">
+              สัดส่วนตามภูมิภาค
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardDescription>การกระจายตัวของคะแนนเสียง</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2</div>
-            <p className="text-xs text-muted-foreground">ภายใน 30 วันนี้</p>
+          <CardContent className="h-[250px] flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={regionData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {regionData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* Section 2: Quick Actions & Recent Activity (Placeholder) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      {/* --- Row 3: Age Chart & Leaderboard --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* กราฟแท่ง: ช่วงอายุ */}
+
+        <Card className="shadow-sm border-slate-100">
           <CardHeader>
-            <CardTitle>รายการเก็บเงินล่าสุด</CardTitle>
+            <CardTitle className="text-base font-bold">
+              การลงคะแนนแยกตามช่วงอายุ
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground text-center py-10">
-              ยังไม่มีข้อมูลธุรกรรม (รอเชื่อมต่อ Database)
-            </p>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={ageData} layout="vertical" margin={{ left: 15 }}>
+                <XAxis type="number" hide />
+                <YAxis
+                  dataKey="age"
+                  type="category"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip cursor={{ fill: "#f1f5f9" }} />
+                <Bar dataKey="votes" fill="#2563eb" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>แจ้งซ่อม / ปัญหา</CardTitle>
+        {/* ตาราง Leaderboard */}
+        <Card className="lg:col-span-2 shadow-sm border-slate-100 overflow-hidden">
+          <CardHeader className="bg-slate-50 border-b">
+            <CardTitle className="text-base font-bold">
+              ผลการลงคะแนน Real-time
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                <p className="text-sm font-medium leading-none">
-                  ห้อง 104 - แอร์ไม่เย็น
-                </p>
-                <span className="ml-auto text-xs text-muted-foreground">
-                  วันนี้
-                </span>
-              </div>
-              <div className="flex items-center">
-                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                <p className="text-sm font-medium leading-none">
-                  ห้อง 201 - เปลี่ยนหลอดไฟ
-                </p>
-                <span className="ml-auto text-xs text-muted-foreground">
-                  เมื่อวาน
-                </span>
-              </div>
-            </div>
-          </CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-slate-50/50">
+                <TableHead className="w-[80px] text-center">อันดับ</TableHead>
+                <TableHead>ผู้สมัคร</TableHead>
+                <TableHead className="text-right">คะแนน</TableHead>
+                <TableHead className="w-[150px]">สัดส่วน (%)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {liveResults.map((cand, index) => {
+                const isTop3 = index < 3;
+                const percent = (cand.votes / totalVotes) * 100;
+                return (
+                  <TableRow key={cand.id}>
+                    <TableCell className="text-center font-black text-lg">
+                      {index === 0 ? (
+                        <Crown className="w-5 h-5 text-yellow-500 mx-auto" />
+                      ) : (
+                        `#${index + 1}`
+                      )}
+                    </TableCell>
+                    <TableCell className="flex items-center gap-3">
+                      <Image
+                        src={cand.img}
+                        alt={cand.name}
+                        width={36}
+                        height={36}
+                        className="rounded-full border"
+                        unoptimized
+                      />
+                      <div>
+                        <span className="font-bold">
+                          {cand.no}. {cand.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-primary">
+                      {cand.votes.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Progress value={percent} className="h-2" />
+                        <span className="text-xs text-slate-500">
+                          {percent.toFixed(1)}%
+                        </span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {/* แถว: ไม่ประสงค์ลงคะแนน */}
+              <TableRow className="bg-slate-50 text-slate-500">
+                <TableCell className="text-center text-xs font-bold">
+                  N/A
+                </TableCell>
+                <TableCell className="font-medium">ไม่ประสงค์ลงคะแนน</TableCell>
+                <TableCell className="text-right font-bold">
+                  {abstainResult.votes.toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Progress
+                      value={(abstainResult.votes / totalVotes) * 100}
+                      className="h-2 bg-slate-200 [&>div]:bg-slate-400"
+                    />
+                    <span className="text-xs">
+                      {((abstainResult.votes / totalVotes) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </Card>
       </div>
     </div>
   );
+}
+
+// Sub-component สำหรับการ์ดสรุปด้านบน
+function StatCard({
+  title,
+  value,
+  subValue,
+  percent,
+  icon: Icon,
+  color,
+  bg,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: any) {
+  return (
+    <Card className="shadow-sm border-slate-100">
+      <CardContent className="p-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{title}</p>
+          <div className="flex items-baseline gap-2 mt-1">
+            <h3 className="text-3xl font-black text-slate-800">
+              {typeof value === "number" ? value.toLocaleString() : value}
+            </h3>
+            {percent && (
+              <span className="text-sm font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                +{percent}%
+              </span>
+            )}
+          </div>
+          {subValue && (
+            <p className="text-xs text-slate-400 mt-1">{subValue}</p>
+          )}
+        </div>
+        <div
+          className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center`}
+        >
+          <Icon className={`w-6 h-6 ${color}`} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function UserCheck(props: any) {
+  return <Users {...props} />;
 }

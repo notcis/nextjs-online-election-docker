@@ -1,7 +1,7 @@
 import { encryptForLineToken } from "./lib/crypto";
 
 // 1. เลขทะเบียนของ สมร
-const memberId = "123456";
+const memberId = "100001";
 
 // 2. เข้ารหัส
 const secureToken = encryptForLineToken(memberId);

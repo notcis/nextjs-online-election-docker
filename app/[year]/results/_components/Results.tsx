@@ -50,7 +50,13 @@ export default function Results({ year }: { year: string }) {
           <p className="text-sm text-gray-500 mt-2 mb-6">
             ผลการนับคะแนนจะแสดงอัตโนมัติ
             <br />
-            หลังจากปิดการลงคะแนนในเวลา 13.00 น.
+            หลังจากปิดการลงคะแนนในเวลา{" "}
+            {data.endTime.toLocaleTimeString("th-TH", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "UTC",
+            })}{" "}
+            น.
           </p>
           <div className="bg-gray-100 rounded-lg p-3">
             <CountdownTimer endTime={data.endTime} />

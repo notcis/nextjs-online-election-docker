@@ -33,72 +33,11 @@ import RegionPieChart from "./_components/RegionPieChart";
 import AgeBarChart from "./_components/AgeBarChart";
 import { getDashboardData } from "@/actions/dashboard.action";
 
-// --------------------------------------------------------------------
-// ข้อมูลจำลอง (Mock Data) - ของจริงจะดึงผ่าน SWR หรือ Server Action
-// --------------------------------------------------------------------
-const trafficData = [
-  { time: "07:00", votes: 120 },
-  { time: "08:00", votes: 450 },
-  { time: "09:00", votes: 980 },
-  { time: "10:00", votes: 1200 },
-  { time: "11:00", votes: 800 },
-  { time: "12:00", votes: 650 },
-];
-
-const regionData = [
-  { name: "ภาคกลาง", value: 45 },
-  { name: "ภาคเหนือ", value: 25 },
-  { name: "ภาคอีสาน", value: 20 },
-  { name: "ภาคใต้", value: 10 },
-];
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
-const ageData = [
-  { age: "20-30 ปี", votes: 350 },
-  { age: "31-45 ปี", votes: 1250 },
-  { age: "46-60 ปี", votes: 980 },
-  { age: "60+ ปี", votes: 420 },
-];
-
-const liveResults = [
-  {
-    id: 1,
-    name: "สมชาย รักสหกรณ์",
-    no: 1,
-    votes: 2150,
-    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Somchai",
-  },
-  {
-    id: 2,
-    name: "สมหญิง ออมทรัพย์",
-    no: 2,
-    votes: 1850,
-    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Somying",
-  },
-  {
-    id: 3,
-    name: "ประเสริฐ พัฒนา",
-    no: 3,
-    votes: 1650,
-    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Prasert",
-  },
-  {
-    id: 4,
-    name: "วันดี มั่นคง",
-    no: 4,
-    votes: 1200,
-    img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Wandee",
-  },
-];
-const abstainResult = { votes: 150 };
-const totalVotes = 3000;
 
 // --------------------------------------------------------------------
 
 export default function DashboardPage() {
-  // Initialize mounted to true directly as this is a client component
-  // and Recharts expects to be rendered on the client.
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null); // เปลี่ยน State ให้รองรับข้อมูลจริง
   const [loading, setLoading] = useState(true);
@@ -123,8 +62,6 @@ export default function DashboardPage() {
 
   if (loading || !data) return <div>กำลังโหลดข้อมูล...</div>;
 
-  console.log(data.summary.totalMembers);
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -143,10 +80,7 @@ export default function DashboardPage() {
           <Clock className="w-4 h-4 mr-2 text-slate-400" />
           เหลือเวลา:{" "}
           <span className="text-primary font-bold ml-1">
-            {data.summary.endTime.toLocaleString("th-TH", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {data.summary.endTime}
           </span>
         </Badge>
       </div>
@@ -246,47 +180,51 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.leaderboard.candidates.map((cand, index) => {
-                const isTop3 = index < 3;
-                const percent = (cand.votes / totalVotes) * 100;
-                return (
-                  <TableRow key={cand.id}>
-                    <TableCell className="text-center font-black text-lg">
-                      {index === 0 ? (
-                        <Crown className="w-5 h-5 text-yellow-500 mx-auto" />
-                      ) : (
-                        `#${index + 1}`
-                      )}
-                    </TableCell>
-                    <TableCell className="flex items-center gap-3">
-                      <Image
-                        src={cand.img}
-                        alt={cand.name}
-                        width={36}
-                        height={36}
-                        className="rounded-full border"
-                        unoptimized
-                      />
-                      <div>
-                        <span className="font-bold">
-                          {cand.no}. {cand.name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-bold text-primary">
-                      {cand.votes.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress value={percent} className="h-2" />
-                        <span className="text-xs text-slate-500">
-                          {percent.toFixed(1)}%
-                        </span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                data.leaderboard.candidates.map((cand: any, index: number) => {
+                  const isTop3 = index < 3;
+                  const percent =
+                    (cand.votes / data.leaderboard.totalVotes) * 100;
+                  return (
+                    <TableRow key={cand.id}>
+                      <TableCell className="text-center font-black text-lg">
+                        {index === 0 ? (
+                          <Crown className="w-5 h-5 text-yellow-500 mx-auto" />
+                        ) : (
+                          `#${index + 1}`
+                        )}
+                      </TableCell>
+                      <TableCell className="flex items-center gap-3">
+                        <Image
+                          src={cand.img}
+                          alt={cand.name}
+                          width={36}
+                          height={36}
+                          className="rounded-full border"
+                          unoptimized
+                        />
+                        <div>
+                          <span className="font-bold">
+                            {cand.no}. {cand.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-bold text-primary">
+                        {cand.votes.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress value={percent} className="h-2" />
+                          <span className="text-xs text-slate-500">
+                            {percent.toFixed(1)}%
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              }
               {/* แถว: ไม่ประสงค์ลงคะแนน */}
               <TableRow className="bg-slate-50 text-slate-500">
                 <TableCell className="text-center text-xs font-bold">

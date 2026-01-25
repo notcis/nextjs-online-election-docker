@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; // Import useEffect and useState
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getNowInThaiTime } from "@/lib/datetime";
 
 interface CountdownTimerProps {
   endTime: Date | string;
@@ -19,7 +20,7 @@ export default function CountdownTimer({ endTime }: CountdownTimerProps) {
     const end = new Date(endTime).getTime();
 
     const updateTimer = () => {
-      const now = new Date().getTime();
+      const now = getNowInThaiTime().getTime(); // ใช้เวลาปัจจุบันใน Thai Time Zone
       const distance = end - now;
 
       if (distance < 0) {

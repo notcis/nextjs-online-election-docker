@@ -1,5 +1,6 @@
 "use server";
 
+import { getNowInThaiTime } from "@/lib/datetime";
 import prisma from "@/lib/prisma";
 
 export async function getDashboardData(year: number) {
@@ -130,7 +131,7 @@ export async function getDashboardData(year: number) {
         totalVoted,
         votePercentage:
           totalEligible > 0 ? (totalVoted / totalEligible) * 100 : 0,
-        endTime: election.endTime,
+        endTime: calculateRemainingTime(election.endTime),
       },
       charts: {
         traffic: trafficData,
@@ -148,3 +149,37 @@ export async function getDashboardData(year: number) {
     return { success: false, error: "ไม่สามารถดึงข้อมูล Dashboard ได้" };
   }
 }
+
+const calculateRemainingTime = (endTimeParam: Date) => {
+  // data.summary.endTime is already a Date object representing Thai time (UTC+7)
+  const endTime = new Date(endTimeParam);
+  const now = getNowInThaiTime(); // Get current Thai time
+
+  const diffMs = endTime.getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return "หมดเวลาลงคะแนนเสียงแล้ว";
+  }
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+
+  const days = Math.floor(totalSeconds / (60 * 60 * 24));
+  const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
+
+  let result = "";
+  if (days > 0) {
+    result = `${days} วัน ${hours} ชั่วโมง`;
+  } else if (hours > 0) {
+    result = `${hours} ชั่วโมง ${minutes} นาที`;
+  } else if (minutes > 0) {
+    result = `${minutes} นาที ${seconds} วินาที`;
+  } else if (seconds > 0) {
+    result = `${seconds} วินาที`;
+  } else {
+    result = "ไม่กี่วินาที"; // Fallback for very small positive diffs
+  }
+
+  return result;
+};

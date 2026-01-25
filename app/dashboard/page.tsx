@@ -31,6 +31,7 @@ import {
 import VoterTrafficChart from "./_components/VoterTrafficChart";
 import RegionPieChart from "./_components/RegionPieChart";
 import AgeBarChart from "./_components/AgeBarChart";
+import { getDashboardData } from "@/actions/dashboard.action";
 
 // --------------------------------------------------------------------
 // ข้อมูลจำลอง (Mock Data) - ของจริงจะดึงผ่าน SWR หรือ Server Action
@@ -97,8 +98,32 @@ const totalVotes = 3000;
 export default function DashboardPage() {
   // Initialize mounted to true directly as this is a client component
   // and Recharts expects to be rendered on the client.
-  const [mounted] = useState(true);
-  if (!mounted) return null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any>(null); // เปลี่ยน State ให้รองรับข้อมูลจริง
+  const [loading, setLoading] = useState(true);
+
+  // ดึงข้อมูลจริงจาก Server
+  useEffect(() => {
+    const fetchRealtimeData = async () => {
+      const year = 2026; // อาจจะดึงจาก URL Params หรือ Global Settings
+      const result = await getDashboardData(year);
+      if (result.success) {
+        setData(result);
+      }
+      setLoading(false);
+    };
+
+    fetchRealtimeData();
+
+    // ทำ Auto-Refresh ทุกๆ 30 วินาที เพื่อให้กราฟวิ่งเอง (Live Dashboard)
+    const interval = setInterval(fetchRealtimeData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || !data) return <div>กำลังโหลดข้อมูล...</div>;
+
+  console.log(data.summary.totalMembers);
 
   return (
     <div className="space-y-6">
@@ -117,7 +142,12 @@ export default function DashboardPage() {
         >
           <Clock className="w-4 h-4 mr-2 text-slate-400" />
           เหลือเวลา:{" "}
-          <span className="text-primary font-bold ml-1">04:25:12</span>
+          <span className="text-primary font-bold ml-1">
+            {data.summary.endTime.toLocaleString("th-TH", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
         </Badge>
       </div>
 
@@ -125,22 +155,22 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="ผู้มาใช้สิทธิ์ (คน)"
-          value={3000}
-          percent={45.4}
+          value={data.summary.totalVoted}
+          percent={data.summary.votePercentage.toFixed(1)}
           icon={Vote}
           color="text-green-600"
           bg="bg-green-100"
         />
         <StatCard
           title="ผู้มีสิทธิ์เลือกตั้ง"
-          value={6600}
+          value={data.summary.totalEligible}
           icon={UserCheck}
           color="text-blue-600"
           bg="bg-blue-100"
         />
         <StatCard
           title="สมาชิกทั้งหมด"
-          value={12000}
+          value={data.summary.totalMembers}
           icon={Users}
           color="text-purple-600"
           bg="bg-purple-100"
@@ -166,7 +196,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[250px]">
-            <VoterTrafficChart trafficData={trafficData} />
+            <VoterTrafficChart trafficData={data.charts.traffic} />
           </CardContent>
         </Card>
 
@@ -179,7 +209,7 @@ export default function DashboardPage() {
             <CardDescription>การกระจายตัวของคะแนนเสียง</CardDescription>
           </CardHeader>
           <CardContent className="h-[250px] flex items-center justify-center">
-            <RegionPieChart regionData={regionData} COLORS={COLORS} />
+            <RegionPieChart regionData={data.charts.region} COLORS={COLORS} />
           </CardContent>
         </Card>
       </div>
@@ -195,7 +225,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <AgeBarChart ageData={ageData} />
+            <AgeBarChart ageData={data.charts.age} />
           </CardContent>
         </Card>
 
@@ -216,7 +246,7 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {liveResults.map((cand, index) => {
+              {data.leaderboard.candidates.map((cand, index) => {
                 const isTop3 = index < 3;
                 const percent = (cand.votes / totalVotes) * 100;
                 return (
@@ -264,16 +294,16 @@ export default function DashboardPage() {
                 </TableCell>
                 <TableCell className="font-medium">ไม่ประสงค์ลงคะแนน</TableCell>
                 <TableCell className="text-right font-bold">
-                  {abstainResult.votes.toLocaleString()}
+                  {data.leaderboard.abstain.votes.toLocaleString()}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Progress
-                      value={(abstainResult.votes / totalVotes) * 100}
+                      value={data.leaderboard.abstain.percent}
                       className="h-2 bg-slate-200 [&>div]:bg-slate-400"
                     />
                     <span className="text-xs">
-                      {((abstainResult.votes / totalVotes) * 100).toFixed(1)}%
+                      {data.leaderboard.abstain.percent.toFixed(1)}%
                     </span>
                   </div>
                 </TableCell>

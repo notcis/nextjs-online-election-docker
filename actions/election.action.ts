@@ -1,5 +1,6 @@
 "use server";
 
+import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
 import prisma from "@/lib/prisma";
 
 // -------------------------------------------------------------
@@ -21,7 +22,7 @@ export async function getElectionCandidates(year: number) {
     }
 
     // 3. ตรวจสอบเวลา (Business Logic: ป้องกันการดึงรายชื่อนอกเวลาเลือกตั้ง)
-    const now = new Date();
+    const now = getNowInThaiTime();
     if (now < election.startTime) {
       return { success: false, error: "ยังไม่ถึงเวลาเปิดลงคะแนนเสียง" };
     }
@@ -52,8 +53,8 @@ export async function getElectionCandidates(year: number) {
       electionInfo: {
         id: election.id,
         title: election.title,
-        maxVotes: election.maxVotes,
-        endTime: election.endTime,
+        maxVotes: election.maxVotes, // maxVotes is not a datetime, no conversion needed
+        endTime: election.endTime, // Convert for frontend if expected in Thai time
       },
       candidates: finalCandidates.map((c) => ({
         id: c.id,

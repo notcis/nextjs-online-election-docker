@@ -1,8 +1,10 @@
 "use server";
 
 import { decryptLineToken } from "@/lib/crypto";
+import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { cookies } from "next/headers"; // 👈 1. Import cookies API
 
 // -------------------------------------------------------------
 // 2. Server Action หลัก: ตรวจสอบสิทธิ์ผู้ใช้ (Verify Member)
@@ -54,7 +56,7 @@ export async function verifyMemberStatus(
     }
 
     // เช็คเวลาเปิด-ปิด (Business Logic)
-    const now = new Date();
+    const now = getNowInThaiTime();
     if (
       !election.isActive ||
       now < election.startTime ||
@@ -82,6 +84,16 @@ export async function verifyMemberStatus(
       };
     }
 
+    const oneHour = 60 * 60; // อายุ 1 ชั่วโมง (วินาที)
+
+    (await cookies()).set("voter_session", member.id, {
+      httpOnly: true, // ป้องกัน JavaScript ฝั่ง Client อ่าน Cookie นี้ (กัน XSS)
+      secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
+      sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF
+      maxAge: oneHour,
+      path: "/",
+    });
+
     // ผ่านทุกเงื่อนไข: คืนค่าข้อมูลที่จำเป็นเพื่อเข้าสู่หน้าเลือกตั้ง
     return {
       success: true,
@@ -96,4 +108,11 @@ export async function verifyMemberStatus(
       error: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง",
     };
   }
+}
+
+// -------------------------------------------------------------
+// ฟังก์ชันสำหรับ "ลบ" Cookie (เรียกใช้เมื่อทำรายการเสร็จที่หน้า Success)
+// -------------------------------------------------------------
+export async function clearVoterSession() {
+  (await cookies()).delete("voter_session");
 }

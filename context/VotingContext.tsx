@@ -108,7 +108,13 @@ export function VotingProvider({ children }: { children: React.ReactNode }) {
 
   // ฟังก์ชัน: ล้างข้อมูลเมื่อทำรายการเสร็จ
   const clearVotingData = useCallback(() => {
-    setState(defaultState);
+    setState((prev) => ({
+      ...prev,
+      // เคลียร์รายชื่อผู้สมัครที่เลือก
+      selectedCandidates: [],
+      // ตั้งค่าสถานะ "ไม่ประสงค์ลงคะแนน" เป็น false
+      isAbstain: false,
+    }));
   }, []);
 
   // ใช้ useMemo เพื่อป้องกัน Re-render โดยไม่จำเป็น

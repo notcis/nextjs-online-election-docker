@@ -28,20 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// นำเข้า Recharts
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import VoterTrafficChart from "./_components/VoterTrafficChart";
+import RegionPieChart from "./_components/RegionPieChart";
+import AgeBarChart from "./_components/AgeBarChart";
 
 // --------------------------------------------------------------------
 // ข้อมูลจำลอง (Mock Data) - ของจริงจะดึงผ่าน SWR หรือ Server Action
@@ -177,32 +166,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trafficData}>
-                <XAxis
-                  dataKey="time"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="votes"
-                  stroke="#2563eb"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <VoterTrafficChart trafficData={trafficData} />
           </CardContent>
         </Card>
 
@@ -215,27 +179,7 @@ export default function DashboardPage() {
             <CardDescription>การกระจายตัวของคะแนนเสียง</CardDescription>
           </CardHeader>
           <CardContent className="h-[250px] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={regionData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {regionData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <RegionPieChart regionData={regionData} COLORS={COLORS} />
           </CardContent>
         </Card>
       </div>
@@ -251,21 +195,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageData} layout="vertical" margin={{ left: 15 }}>
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="age"
-                  type="category"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip cursor={{ fill: "#f1f5f9" }} />
-                <Bar dataKey="votes" fill="#2563eb" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <AgeBarChart ageData={ageData} />
           </CardContent>
         </Card>
 

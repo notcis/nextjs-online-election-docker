@@ -76,73 +76,11 @@ export default function Success({ year }: { year: string }) {
           </p>
         </div>
 
-        {/* e-Receipt Card */}
-        <Card className="w-full border-0 shadow-md bg-white overflow-hidden mb-6">
-          {/* <div className="bg-primary px-4 py-3 flex items-center justify-between text-white">
-            <div className="flex items-center gap-2 font-bold text-sm">
-              <Receipt className="w-4 h-4" />
-              <span>หลักฐานการลงคะแนน (e-Receipt)</span>
-            </div>
-          </div> */}
-          <CardContent className="p-0 text-sm">
-            <div className="p-4 border-b border-dashed">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-500">วันที่-เวลา:</span>
-                <span className="font-semibold text-gray-800">{timestamp}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">ปีการเลือกตั้ง:</span>
-                <span className="font-semibold text-gray-800">{year}</span>
-              </div>
-            </div>
-
-            {/* สรุปรายการที่เลือก */}
-            {/*  <div className="p-4 bg-gray-50">
-              <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">
-                รายการที่ท่านเลือก
-              </p>
-
-              {state.isAbstain ? (
-                <div className="flex items-center gap-3 bg-white p-3 rounded-lg border">
-                  <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-full text-red-600 font-bold">
-                    <X className="w-6 h-6" />
-                  </div>
-                  <span className="font-bold text-red-600">
-                    ไม่ประสงค์ลงคะแนน
-                  </span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {state.selectedCandidates.map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex items-center gap-3 bg-white p-2 rounded-lg border"
-                    >
-                      <div className="w-8 h-8 rounded-full overflow-hidden relative border">
-                        <Image
-                          src={c.imageUrl}
-                          alt={c.firstName}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
-                      <span className="font-bold text-primary w-6 text-center">
-                        {c.candidateNumber}
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {c.firstName} {c.lastName}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div> */}
-          </CardContent>
-        </Card>
-
         {/* Action Buttons */}
-        <div className="w-full space-y-3 mt-auto">
+        <div className="w-full space-y-10">
+          <p className="text-center text-xs text-gray-400 -mt-1 mb-2">
+            *สามารถติดตามผลได้หลังจากปิดการลงคะแนนในเวลา 13.00 น.
+          </p>
           {/* 1. ปุ่มดูผลคะแนน (Link ไปหน้า /results) */}
           <Link href={`/${year}/results`} className="w-full block">
             <Button
@@ -153,9 +91,6 @@ export default function Success({ year }: { year: string }) {
               สรุปผลการลงคะแนน
             </Button>
           </Link>
-          <p className="text-center text-xs text-gray-400 -mt-1 mb-2">
-            *สามารถติดตามผลได้หลังจากปิดการลงคะแนนในเวลา 13.00 น.
-          </p>
 
           {/* 2. ปุ่มทำแบบสอบถาม (Link ออกไปภายนอก) */}
           <Link

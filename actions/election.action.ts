@@ -33,6 +33,16 @@ export async function getElectionCandidates(year: number) {
       return { success: false, error: "การเลือกตั้งถูกระงับชั่วคราว" };
     }
 
+    const systemSettings = await prisma.systemSetting.findUnique({
+      where: { id: "global-settings" },
+    });
+    if (!systemSettings || !systemSettings.isSystemActive) {
+      return {
+        success: false,
+        error: "การเลือกตั้งถูกระงับชั่วคราว",
+      };
+    }
+
     // 4. แยกและจัดเรียงรายชื่อผู้สมัคร
     // 4.1. กลุ่มคนปกติ (isAbstain = false) เรียงตามหมายเลขน้อยไปมาก
     const normalCandidates = election.candidates

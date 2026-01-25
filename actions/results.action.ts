@@ -15,12 +15,6 @@ export async function getElectionResults(year: number) {
 
     // 1. ตรวจสอบเวลา: ถ้ายังไม่ปิดโหวต ไม่ให้ดูผล (ความลับ)
     const now = getNowInThaiTime();
-    console.log("now", now);
-    console.log("election.endTime", election.endTime);
-    console.log(
-      "convertUtcToThaiTime(election.endTime)",
-      convertUtcToThaiTime(election.endTime),
-    );
 
     if (now < election.endTime) {
       return {

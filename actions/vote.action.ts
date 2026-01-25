@@ -44,6 +44,16 @@ export async function submitVote(payload: SubmitVotePayload) {
       };
     }
 
+    const systemSettings = await prisma.systemSetting.findUnique({
+      where: { id: "global-settings" },
+    });
+    if (!systemSettings || !systemSettings.isSystemActive) {
+      return {
+        success: false,
+        error: "การเลือกตั้งถูกระงับชั่วคราว",
+      };
+    }
+
     // 4. กรณีเลือก "ไม่ประสงค์ลงคะแนน": ต้องไปหา ID ของตัวเลือกนี้ก่อน
     let finalCandidateIds = selectedCandidateIds;
     if (isAbstain) {

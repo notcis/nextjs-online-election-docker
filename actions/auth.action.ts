@@ -65,6 +65,16 @@ export async function verifyMemberStatus(
       return { success: false, error: "ไม่อยู่ในช่วงเวลาการเปิดลงคะแนนเสียง" };
     }
 
+    const systemSettings = await prisma.systemSetting.findUnique({
+      where: { id: "global-settings" },
+    });
+    if (!systemSettings || !systemSettings.isSystemActive) {
+      return {
+        success: false,
+        error: "การเลือกตั้งถูกระงับชั่วคราว",
+      };
+    }
+
     // ขั้นตอนที่ 5: ตรวจสอบว่าเคยลงคะแนนแล้วหรือยัง
     const existingVote = await prisma.memberVoteStatus.findUnique({
       where: {

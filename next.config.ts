@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/7.x/**",
       },
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   /* config options here */

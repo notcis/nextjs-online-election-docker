@@ -234,6 +234,7 @@ export default function CandidatesPage() {
         onClose={() => setIsModalOpen(false)}
         electionId={electionId}
         onRefresh={loadData}
+        type="candidate"
       />
     </div>
   );

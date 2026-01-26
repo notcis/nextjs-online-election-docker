@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { parseExcelToCandidates } from "@/lib/excel";
+import { parseExcelToCandidates, parseExcelToMembers } from "@/lib/excel";
 import { importCandidates } from "@/actions/candidate.action";
 import {
   Dialog,
@@ -13,12 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { UploadCloud, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { importMembersBulk } from "@/actions/member.action";
 
 export default function ExcelImportModal({
   isOpen,
   onClose,
   electionId,
   onRefresh,
+  type,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: any) {
   const [file, setFile] = useState<File | null>(null);
@@ -31,12 +33,16 @@ export default function ExcelImportModal({
     setLoading(true);
     setError("");
 
-    try {
-      // 1. แปลงไฟล์เป็น JSON
-      const data = await parseExcelToCandidates(file);
+    let res;
 
-      // 2. ส่งให้ Server Action บันทึก
-      const res = await importCandidates(electionId, data);
+    try {
+      if (type === "member") {
+        const data = await parseExcelToMembers(file);
+        res = await importMembersBulk(data);
+      } else {
+        const data = await parseExcelToCandidates(file);
+        res = await importCandidates(electionId, data);
+      }
 
       if (res.success) {
         setSuccess(`นำเข้าข้อมูลสำเร็จ ${res.count} รายการ`);

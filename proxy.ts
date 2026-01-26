@@ -1,18 +1,24 @@
 // src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const adminSession = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   // ------------------------------------------------------------------
   // Zone 1: ระบบหลังบ้าน (Admin Dashboard) ใช้ better-auth
   // ------------------------------------------------------------------
   if (pathname.startsWith("/dashboard")) {
     // เช็ค Cookie ของ better-auth (ชื่ออาจเปลี่ยนตาม Config ที่คุณตั้งไว้)
-    const adminSession = request.cookies.get(
+    /* const adminSession = request.cookies.get(
       "better-auth.session_token",
-    )?.value;
+    )?.value; */
 
     if (!adminSession) {
       // ถ้าไม่มี Session แอดมิน ให้เด้งไปหน้า Login ของ Admin

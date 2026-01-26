@@ -26,8 +26,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: session } = authClient.useSession();
-  if (session?.user.id) return router.push("/");
+  //const { data: session } = authClient.useSession();
+  //if (session?.user.id) return router.push("/");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

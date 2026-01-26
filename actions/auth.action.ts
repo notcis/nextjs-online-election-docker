@@ -2,7 +2,7 @@
 
 import { decryptLineToken } from "@/lib/crypto";
 import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers"; // 👈 1. Import cookies API
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 // -------------------------------------------------------------
 // ดึงข้อมูลการเลือกตั้งและรายชื่อผู้สมัครทั้งหมดของปีนั้น

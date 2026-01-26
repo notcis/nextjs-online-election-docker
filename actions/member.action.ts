@@ -1,7 +1,7 @@
 "use server";
 
 import { convertUtcToThaiTime } from "@/lib/datetime";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 

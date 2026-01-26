@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 // 1. ดึงข้อมูลตัวเลือก (Election ทั้งหมด และ Candidate ทั้งหมด) สำหรับใส่ใน Dropdown

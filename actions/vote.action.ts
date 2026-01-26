@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
 import { headers } from "next/headers";
 

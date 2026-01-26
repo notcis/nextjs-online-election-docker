@@ -1,7 +1,7 @@
 "use server";
 
 import { convertUtcToThaiTime, getNowInThaiTime } from "@/lib/datetime";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function getElectionResults(year: number) {
   try {

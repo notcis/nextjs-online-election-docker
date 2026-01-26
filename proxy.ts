@@ -1,15 +1,12 @@
 // src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionCookie } from "better-auth/cookies";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const adminSession = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const adminSession = getSessionCookie(request);
 
   // ------------------------------------------------------------------
   // Zone 1: ระบบหลังบ้าน (Admin Dashboard) ใช้ better-auth

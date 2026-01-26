@@ -8,8 +8,4 @@ export const authClient = createAuthClient({
     : process.env.NEXT_PUBLIC_SERVER_URL,
 
   // หากคุณใช้ Trusted Origins (จำเป็นในบางกรณีบน Vercel)
-  trustedOrigins: [
-    process.env.NEXT_PUBLIC_SERVER_URL!,
-    `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
-  ],
 });

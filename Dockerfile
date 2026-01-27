@@ -56,6 +56,6 @@ ENV CHECKPOINT_DISABLE=1
 ENV DISABLE_PRISMA_TELEMETRY=true
 ENV PORT=3000
 
-ENV HOSTNAME="0.0.0.0" # Next.js 12+ แนะนำให้ตั้งค่า HOSTNAME สำหรับ `next start`
+ENV HOSTNAME="0.0.0.0" 
 
-CMD ["npm", "start"] # สำหรับโหมด non-standalone จะใช้คำสั่ง `next start` ซึ่งมักจะถูกเรียกผ่าน `npm start`
+CMD ["npm", "start"] 

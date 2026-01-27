@@ -35,25 +35,18 @@ ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
+# Copy built application files and public assets
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# ในโหมด non-standalone จะคัดลอกโฟลเดอร์ .next ทั้งหมด
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 
-# **สำคัญ: Copy generated Prisma folder**
-COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
+# Copy node_modules (production dependencies)
+# ในโหมด non-standalone, node_modules จะไม่ถูกรวมอยู่ใน .next/standalone
+# ดังนั้นต้องคัดลอก node_modules ทั้งหมดจาก stage 'deps'
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
-# Copy prisma schema (สำหรับ migration)
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
-
-# **Important: Copy Prisma CLI and engines for npx**
-# This ensures that 'npx prisma ...' commands can be run in the final container.
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts # ถ้ามีและจำเป็นต้องใช้ใน runtime
 
 USER nextjs
 
@@ -62,6 +55,7 @@ EXPOSE 3000
 ENV CHECKPOINT_DISABLE=1
 ENV DISABLE_PRISMA_TELEMETRY=true
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+ENV HOSTNAME="0.0.0.0" # Next.js 12+ แนะนำให้ตั้งค่า HOSTNAME สำหรับ `next start`
+
+CMD ["npm", "start"] # สำหรับโหมด non-standalone จะใช้คำสั่ง `next start` ซึ่งมักจะถูกเรียกผ่าน `npm start`

@@ -1,57 +1,48 @@
 FROM node:24-alpine AS base
 
-# Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm ci
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
 
-# Rebuild the source code only when needed
+RUN npm ci
+RUN npx prisma generate
+
 FROM base AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
-RUN npx prisma generate
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the project
 RUN npm run build
 
-# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Copy built application files and public assets
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-
-# ในโหมด non-standalone จะคัดลอกโฟลเดอร์ .next ทั้งหมด
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-
-# Copy node_modules (production dependencies)
-# ในโหมด non-standalone, node_modules จะไม่ถูกรวมอยู่ใน .next/standalone
-# ดังนั้นต้องคัดลอก node_modules ทั้งหมดจาก stage 'deps'
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts # ถ้ามีและจำเป็นต้องใช้ใน runtime
+# Copy all necessary files for non-standalone mode
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV CHECKPOINT_DISABLE=1
-ENV DISABLE_PRISMA_TELEMETRY=true
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-ENV HOSTNAME="0.0.0.0" 
-
-CMD ["npm", "start"] 
+CMD ["npm", "start"]

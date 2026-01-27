@@ -12,6 +12,8 @@ import {
   CheckSquare,
   LogOut,
   Loader2,
+  History,
+  BluetoothConnectedIcon,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -24,7 +26,16 @@ const menuItems = [
   },
   { name: "รายชื่อผู้สมัคร", href: "/dashboard/candidates", icon: UserCheck },
   { name: "ฐานข้อมูลสมาชิก", href: "/dashboard/members", icon: Users },
-  { name: "ตั้งค่าระบบ", href: "/dashboard/vote-tally", icon: Settings },
+  {
+    name: "เชื่อมโยงข้อมูล",
+    href: "/dashboard/vote-tally",
+    icon: BluetoothConnectedIcon,
+  },
+  {
+    name: "ประวัติการใช้สิทธิ์",
+    href: "/dashboard/vote-status",
+    icon: History,
+  },
 ];
 
 export default function AppSidebar() {

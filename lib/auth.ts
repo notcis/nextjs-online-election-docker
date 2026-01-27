@@ -18,4 +18,9 @@ export const auth = betterAuth({
       : "http://localhost:3000",
 
   secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins: [
+    "http://localhost:3000", // ถ้ามีหลาย port
+    process.env.BETTER_AUTH_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  ].filter(Boolean) as string[],
 });

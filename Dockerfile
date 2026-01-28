@@ -11,10 +11,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # คัดลอก Prisma schema เพื่อให้ `prisma generate` ทำงานได้ตอน `npm ci`
 COPY prisma ./prisma/
-COPY prisma.config.ts ./prisma.config.ts
+COPY prisma.config.ts ./ 
  
 # ติดตั้ง dependencies ทั้งหมดด้วย `npm ci` เพื่อความรวดเร็วและแม่นยำ
 RUN npm ci
+RUN npx prisma generate
  
 # Stage 2: Build Application
 # ใช้ base image เดียวกันกับ stage ก่อนหน้า
@@ -27,13 +28,6 @@ COPY --from=deps /app/node_modules /app/node_modules
  
 # คัดลอกโค้ดของแอปพลิเคชันทั้งหมด
 COPY . .
- 
-# สร้าง Prisma Client อีกครั้งเพื่อให้แน่ใจว่าถูกต้อง
-# (อาจไม่จำเป็นถ้า `postinstall` ทำงานสมบูรณ์ แต่ใส่ไว้เพื่อความแน่นอน)
-RUN npx prisma generate
-
-# เพิ่มหน่วยความจำสำหรับ Node.js build process เพื่อหลีกเลี่ยง SIGKILL
-ENV NODE_OPTIONS="--max-old-space-size=4096"
  
 # Build Next.js app สำหรับ production
 # โดยจะใช้ output 'standalone' ที่กำหนดใน next.config.js
@@ -63,12 +57,10 @@ COPY --from=builder /app/public /app/public
 # คัดลอก standalone output และเปลี่ยน owner เป็น user 'nextjs'
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# คัดลอก Prisma migrations เพื่อใช้รัน `migrate deploy`
-COPY --from=builder /app/prisma/migrations ./prisma/migrations
-# คัดลอก schema.prisma ไปด้วยเผื่อ `migrate deploy` ต้องการ
-COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
-# คัดลอก prisma.config.ts เพื่อให้ `prisma migrate deploy` สามารถอ่านค่า DATABASE_URL ได้
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+
+
+COPY --from=builder /app/prisma.config.ts ./
+COPY --from=builder /app/prisma ./prisma
 
 # เปลี่ยนไปใช้ user ที่ไม่ใช่ root
 USER nextjs
@@ -80,4 +72,4 @@ ENV PORT 3000
 # คำสั่งสำหรับรันแอปพลิเคชัน
 # 1. รัน Prisma migrations
 # 2. เริ่ม Next.js server จาก standalone output (server.js)
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+CMD ["node", "server.js"]

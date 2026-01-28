@@ -30,6 +30,9 @@ COPY . .
 # สร้าง Prisma Client อีกครั้งเพื่อให้แน่ใจว่าถูกต้อง
 # (อาจไม่จำเป็นถ้า `postinstall` ทำงานสมบูรณ์ แต่ใส่ไว้เพื่อความแน่นอน)
 RUN npx prisma generate
+
+# เพิ่มหน่วยความจำสำหรับ Node.js build process เพื่อหลีกเลี่ยง SIGKILL
+ENV NODE_OPTIONS="--max-old-space-size=4096"
  
 # Build Next.js app สำหรับ production
 # โดยจะใช้ output 'standalone' ที่กำหนดใน next.config.js
@@ -44,6 +47,9 @@ WORKDIR /app
 # กำหนด Environment เป็น production
 ENV NODE_ENV=production
 # ปิดการใช้งาน Telemetry ของ Next.js (optional)
+# หากต้องการเปิดใช้งาน ให้เปลี่ยนเป็น ENV NEXT_TELEMETRY_DISABLED=1
+# และลบเครื่องหมาย # ออก
+# (แก้ไขตามคำเตือน "LegacyKeyValueFormat")
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 # สร้าง user และ group สำหรับรันแอปพลิเคชันเพื่อความปลอดภัย (run as non-root)

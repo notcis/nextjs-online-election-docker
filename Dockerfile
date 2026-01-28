@@ -66,6 +66,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma/migrations ./prisma/migrations
 # คัดลอก schema.prisma ไปด้วยเผื่อ `migrate deploy` ต้องการ
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
+# คัดลอก prisma.config.ts เพื่อให้ `prisma migrate deploy` สามารถอ่านค่า DATABASE_URL ได้
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
 # เปลี่ยนไปใช้ user ที่ไม่ใช่ root
 USER nextjs

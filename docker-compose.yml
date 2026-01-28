@@ -24,3 +24,4 @@ services:
       NODE_ENV: production # กำหนดโหมดการทำงานเป็น production
       # เพิ่มตัวแปรสภาพแวดล้อมอื่นๆ ที่จำเป็นสำหรับ Next.js ที่ขึ้นต้นด้วย NEXT_PUBLIC_... ได้ที่นี่
       UPLOADTHING_TOKEN: ${UPLOADTHING_TOKEN}
+    image: notcis07/nextjs-election:1.0.0

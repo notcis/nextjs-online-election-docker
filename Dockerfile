@@ -1,60 +1,74 @@
-
+# Stage 1: ติดตั้ง Dependencies
+# ใช้ node:20-alpine เป็น base image ที่มีขนาดเล็ก
 FROM node:20-alpine AS deps
+# ติดตั้ง libc6-compat สำหรับ Prisma Engine บน Alpine
+# ดูเพิ่มเติม: https://github.com/prisma/prisma/issues/13948
+RUN apk add --no-cache libc6-compat
  
 WORKDIR /app
  
-# คัดลอก package.json และ package-lock.json เพื่อติดตั้ง dependencies
-# package-lock.json สำคัญมากสำหรับการติดตั้งที่แม่นยำและรวดเร็ว
+# คัดลอกไฟล์ที่จำเป็นสำหรับการติดตั้ง dependencies
 COPY package.json package-lock.json ./
+# คัดลอก Prisma schema เพื่อให้ `prisma generate` ทำงานได้ตอน `npm ci`
+COPY prisma ./prisma/
  
-# ติดตั้ง dependencies ทั้งหมด (รวมถึง devDependencies) โดยใช้ npm ci ที่เหมาะสำหรับ CI/CD
+# ติดตั้ง dependencies ทั้งหมดด้วย `npm ci` เพื่อความรวดเร็วและแม่นยำ
 RUN npm ci
  
-# Stage 2: Builder
-# ใช้ Node.js 20 Alpine เป็น base image สำหรับขั้นตอนการ build
+# Stage 2: Build Application
+# ใช้ base image เดียวกันกับ stage ก่อนหน้า
 FROM node:20-alpine AS builder
  
 WORKDIR /app
  
-# คัดลอก node_modules จาก stage 'deps'
+# คัดลอก node_modules ที่ติดตั้งแล้วจาก stage 'deps'
 COPY --from=deps /app/node_modules /app/node_modules
  
-# คัดลอกโค้ดแอปพลิเคชันที่เหลือทั้งหมด
+# คัดลอกโค้ดของแอปพลิเคชันทั้งหมด
 COPY . .
  
-# สร้าง Prisma client โดยใช้ npx
-# ขั้นตอนนี้สำคัญเพื่อให้แอปพลิเคชันสามารถใช้งาน Prisma ได้
+# สร้าง Prisma Client อีกครั้งเพื่อให้แน่ใจว่าถูกต้อง
+# (อาจไม่จำเป็นถ้า `postinstall` ทำงานสมบูรณ์ แต่ใส่ไว้เพื่อความแน่นอน)
 RUN npx prisma generate
  
-# Build แอปพลิเคชัน Next.js
+# Build Next.js app สำหรับ production
+# โดยจะใช้ output 'standalone' ที่กำหนดใน next.config.js
 RUN npm run build
  
-# Stage 3: Runner
-# ใช้ Node.js 20 Alpine เป็น base image สำหรับรันแอปพลิเคชันใน production
+# Stage 3: Production Runner
+# ใช้ base image ที่เล็กที่สุดเท่าที่จะทำได้
 FROM node:20-alpine AS runner
  
 WORKDIR /app
  
-# กำหนด NODE_ENV เป็น production
+# กำหนด Environment เป็น production
 ENV NODE_ENV=production
+# ปิดการใช้งาน Telemetry ของ Next.js (optional)
+# ENV NEXT_TELEMETRY_DISABLED 1
 
-# คัดลอก package.json และ package-lock.json เพื่อติดตั้งเฉพาะ production dependencies
-COPY package.json package-lock.json ./
+# สร้าง user และ group สำหรับรันแอปพลิเคชันเพื่อความปลอดภัย (run as non-root)
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# ติดตั้งเฉพาะ production dependencies
-RUN npm ci --omit=dev
- 
-# คัดลอกไฟล์ที่ build แล้วจาก stage 'builder'
-COPY --from=builder /app/.next /app/.next
+# คัดลอกไฟล์ที่จำเป็นจาก stage 'builder'
+# เราจะคัดลอกเฉพาะไฟล์ที่จำเป็นสำหรับ production เท่านั้น
 COPY --from=builder /app/public /app/public
-# คัดลอกโฟลเดอร์ prisma (schema.prisma และ migrations) เพื่อใช้ในการรัน migrate deploy
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts prisma.config.ts
+# คัดลอก standalone output และเปลี่ยน owner เป็น user 'nextjs'
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# คัดลอก Prisma migrations เพื่อใช้รัน `migrate deploy`
+COPY --from=builder /app/prisma/migrations ./prisma/migrations
+# คัดลอก schema.prisma ไปด้วยเผื่อ `migrate deploy` ต้องการ
+COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
+
+# เปลี่ยนไปใช้ user ที่ไม่ใช่ root
+USER nextjs
  
-# กำหนด port ที่ Next.js จะรัน
+# กำหนด Port ที่จะให้แอปพลิเคชันทำงาน
 EXPOSE 3000
+ENV PORT 3000
  
 # คำสั่งสำหรับรันแอปพลิเคชัน
-# ขั้นแรก: รัน Prisma migrations เพื่ออัปเดตฐานข้อมูล
-# ขั้นสอง: เริ่มต้นแอปพลิเคชัน Next.js
-CMD sh -c "npx prisma migrate deploy && npm start"
+# 1. รัน Prisma migrations
+# 2. เริ่ม Next.js server จาก standalone output (server.js)
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]

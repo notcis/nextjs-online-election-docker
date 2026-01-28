@@ -11,6 +11,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # คัดลอก Prisma schema เพื่อให้ `prisma generate` ทำงานได้ตอน `npm ci`
 COPY prisma ./prisma/
+COPY prisma.config.ts ./prisma.config.ts
  
 # ติดตั้ง dependencies ทั้งหมดด้วย `npm ci` เพื่อความรวดเร็วและแม่นยำ
 RUN npm ci

@@ -3,7 +3,7 @@
 FROM node:20-alpine AS deps
 # ติดตั้ง libc6-compat สำหรับ Prisma Engine บน Alpine
 # ดูเพิ่มเติม: https://github.com/prisma/prisma/issues/13948
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
  
 WORKDIR /app
  
@@ -57,6 +57,11 @@ COPY --from=builder /app/public /app/public
 # คัดลอก standalone output และเปลี่ยน owner เป็น user 'nextjs'
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# --- จุดที่ต้องเพิ่ม: คัดลอก Prisma Client ที่ generate แล้ว ---
+# สำคัญมาก: standalone จะไม่เอา prisma client ไปด้วยอัตโนมัติในบางกรณี
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 
 COPY --from=builder /app/prisma.config.ts ./

@@ -98,9 +98,10 @@ export async function verifyMemberStatus(
 
     (await cookies()).set("voter_session", member.id, {
       httpOnly: true, // ป้องกัน JavaScript ฝั่ง Client อ่าน Cookie นี้ (กัน XSS)
-      //secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
-      secure: false,
-      sameSite: "lax", // ป้องกันการโจมตีแบบ CSRF
+      secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
+      //secure: false,
+      sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF
+      //sameSite: "lax", // ป้องกันการโจมตีแบบ CSRF
       maxAge: oneHour,
       path: "/",
     });

@@ -31,7 +31,7 @@ COPY . .
  
 # Build Next.js app สำหรับ production
 # โดยจะใช้ output 'standalone' ที่กำหนดใน next.config.js
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
  
 # Stage 3: Production Runner
 # ใช้ base image ที่เล็กที่สุดเท่าที่จะทำได้

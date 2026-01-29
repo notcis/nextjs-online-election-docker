@@ -6,11 +6,14 @@ services:
     restart: always
     ports:
       - "3001:3000"
-    # --- เพิ่มบรรทัดนี้ ---
     env_file:
       - .env
-    # --------------------
-    # ส่วน environment เดิมสามารถลบทิ้งได้เลย หรือเก็บเฉพาะตัวที่อยาก Override
-    environment:
-      - NODE_ENV=production
+    # ระบุให้ service นี้ใช้งาน network ชื่อ app-network
+    networks:
+      - app-network
     image: notcis07/nextjs-election:1.0.0
+
+# ประกาศ network ที่มีอยู่แล้ว (External Network)
+networks:
+  app-network:
+    external: true

@@ -71,8 +71,8 @@ COPY --from=builder /app/prisma ./prisma
 USER nextjs
  
 # กำหนด Port ที่จะให้แอปพลิเคชันทำงาน
-EXPOSE 3000
-ENV PORT 3000
+EXPOSE 3001
+ENV PORT 3001
  
 # คำสั่งสำหรับรันแอปพลิเคชัน
 # 1. รัน Prisma migrations

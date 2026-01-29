@@ -1,27 +1,16 @@
 services:
   app:
     build:
-      context: . # สร้าง image จาก Dockerfile ใน directory ปัจจุบัน
+      context: .
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000" # เปิดพอร์ต 3000 ของ container ไปยังพอร์ต 3000 ของ host
+      - "3001:3000"
+    # --- เพิ่มบรรทัดนี้ ---
+    env_file:
+      - .env
+    # --------------------
+    # ส่วน environment เดิมสามารถลบทิ้งได้เลย หรือเก็บเฉพาะตัวที่อยาก Override
     environment:
-      # กำหนดตัวแปรสภาพแวดล้อมสำหรับเชื่อมต่อฐานข้อมูล (ต้องตรงกับบริการ 'db')
-      DATABASE_URL: ${DATABASE_URL}
-      DATABASE_HOST: ${DATABASE_HOST} # ชื่อ service ของฐานข้อมูลใน docker-compose
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_PORT: ${DATABASE_PORT}
-
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-
-      # กำหนด ENCRYPTION_SECRET_KEY (ต้องเป็น 64 ตัวอักษรฐานสิบหก)
-      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
-      NODE_ENV: production # กำหนดโหมดการทำงานเป็น production
-      # เพิ่มตัวแปรสภาพแวดล้อมอื่นๆ ที่จำเป็นสำหรับ Next.js ที่ขึ้นต้นด้วย NEXT_PUBLIC_... ได้ที่นี่
-      UPLOADTHING_TOKEN: ${UPLOADTHING_TOKEN}
+      - NODE_ENV=production
     image: notcis07/nextjs-election:1.0.0

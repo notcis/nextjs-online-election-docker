@@ -37,8 +37,17 @@ interface VotingContextType {
   clearVotingData: () => void;
 }
 
+// Helper function สำหรับดึงค่าจาก Cookie (ใช้ได้เฉพาะฝั่ง Client)
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+  return null;
+};
+
 const defaultState: VotingState = {
-  memberId: null,
+  memberId: getCookie("voter_session"),
   electionId: null,
   maxVotes: 0,
   selectedCandidates: [],

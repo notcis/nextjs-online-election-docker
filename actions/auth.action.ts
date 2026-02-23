@@ -97,7 +97,8 @@ export async function verifyMemberStatus(
     const oneHour = 60 * 60; // อายุ 1 ชั่วโมง (วินาที)
 
     (await cookies()).set("voter_session", member.id, {
-      httpOnly: true, // ป้องกัน JavaScript ฝั่ง Client อ่าน Cookie นี้ (กัน XSS)
+      //httpOnly: true, // ป้องกัน JavaScript ฝั่ง Client อ่าน Cookie นี้ (กัน XSS)
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
       //secure: false,
       sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF

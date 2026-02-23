@@ -93,3 +93,60 @@ export async function updateElectionConfig(
     return { success: false, error: "บันทึกข้อมูลการเลือกตั้งไม่สำเร็จ" };
   }
 }
+
+// [เพิ่มใหม่] 1. ดึงรายชื่อการเลือกตั้งทั้งหมดสำหรับทำ Dropdown
+export async function getElectionsList() {
+  try {
+    const elections = await prisma.election.findMany({
+      orderBy: { year: "desc" },
+    });
+    return { success: true, data: elections };
+  } catch (error) {
+    console.error("Get Elections Error:", error);
+    return { success: false, error: "ไม่สามารถดึงข้อมูลปีการเลือกตั้งได้" };
+  }
+}
+
+// [เพิ่มใหม่] 2. สร้างการเลือกตั้งใหม่
+export async function createElection(data: {
+  year: number;
+  title: string;
+  maxVotes: number;
+  startTime: Date;
+  endTime: Date;
+}) {
+  try {
+    // เช็คว่าปีนี้สร้างไปแล้วหรือยัง
+    const existing = await prisma.election.findUnique({
+      where: { year: data.year },
+    });
+
+    if (existing) {
+      return {
+        success: false,
+        error: `ปีการเลือกตั้ง ${data.year} มีอยู่ในระบบแล้ว`,
+      };
+    }
+
+    if (data.endTime <= data.startTime) {
+      return { success: false, error: "เวลาปิดหีบต้องอยู่หลังเวลาเปิดหีบ" };
+    }
+
+    await prisma.election.create({
+      data: {
+        year: data.year,
+        title: data.title,
+        maxVotes: data.maxVotes,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        isActive: true,
+      },
+    });
+
+    revalidatePath("/dashboard/election");
+    return { success: true };
+  } catch (error) {
+    console.error("Create Election Error:", error);
+    return { success: false, error: "เกิดข้อผิดพลาดในการสร้างการเลือกตั้ง" };
+  }
+}

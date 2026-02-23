@@ -21,6 +21,8 @@ export default function Confirm({ year }: { year: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  
+
   // Guard: ตรวจสอบว่ามีข้อมูลการเลือกตั้งหรือไม่ (ถ้าไม่มีให้เด้งกลับหน้าโหวต)
   useEffect(() => {
     /* if (!state.memberId) {

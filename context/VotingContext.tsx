@@ -37,17 +37,8 @@ interface VotingContextType {
   clearVotingData: () => void;
 }
 
-// Helper function สำหรับดึงค่าจาก Cookie (ใช้ได้เฉพาะฝั่ง Client)
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-  return null;
-};
-
 const defaultState: VotingState = {
-  memberId: getCookie("voter_session"),
+  memberId: null,
   electionId: null,
   maxVotes: 0,
   selectedCandidates: [],
@@ -58,8 +49,17 @@ const defaultState: VotingState = {
 const VotingContext = createContext<VotingContextType | undefined>(undefined);
 
 // 5. Provider Component สำหรับครอบ App
-export function VotingProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<VotingState>(defaultState);
+export function VotingProvider({
+  children,
+  initialMemberId = null,
+}: {
+  children: React.ReactNode;
+  initialMemberId?: string | null;
+}) {
+  const [state, setState] = useState<VotingState>({
+    ...defaultState,
+    memberId: initialMemberId,
+  });
 
   // ฟังก์ชันเซ็ตข้อมูลการเลือกตั้งตั้งต้น (เรียกตอนหน้า Landing โหลดเสร็จ)
   const setElectionInfo = useCallback(

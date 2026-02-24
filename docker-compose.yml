@@ -20,7 +20,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - app-network
+      - mysql_mysql-network
     image: notcis07/nextjs-election:1.0.1
 
 # ประกาศ network ที่มีอยู่แล้ว (External Network)

@@ -98,8 +98,8 @@ export async function verifyMemberStatus(
 
     (await cookies()).set("voter_session", member.id, {
       httpOnly: true, // เปลี่ยนเป็น true เพื่อความปลอดภัยสูงสุด (อ่านค่าผ่าน Server Component แทน)
-      secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
-      //secure: false,
+      //secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
+      secure: false,
       sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF
       //sameSite: "lax", // ป้องกันการโจมตีแบบ CSRF
       maxAge: oneHour,

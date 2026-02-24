@@ -3,16 +3,27 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+        DATABASE_URL: ${DATABASE_URL}
+        DATABASE_USER: ${DATABASE_USER}
+        DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+        DATABASE_NAME: ${DATABASE_NAME}
+        DATABASE_HOST: ${DATABASE_HOST}
+        DATABASE_PORT: ${DATABASE_PORT}
     container_name: election-online-app
     restart: always
     env_file:
       - .env
-    # ระบุให้ service นี้ใช้งาน network ชื่อ app-network
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
     networks:
       - app-network
-    image: notcis07/nextjs-election:1.0.0
+    image: notcis07/nextjs-election:1.0.1
 
 # ประกาศ network ที่มีอยู่แล้ว (External Network)
 networks:
-  app-network:
+  mysql_mysql-network:
     external: true

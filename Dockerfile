@@ -22,6 +22,30 @@ RUN npx prisma generate
 FROM node:20-alpine AS builder
  
 WORKDIR /app
+
+ARG BETTER_AUTH_SECRET
+
+ARG DATABASE_URL
+ARG DATABASE_USER
+ARG DATABASE_PASSWORD
+ARG DATABASE_NAME
+ARG DATABASE_HOST
+ARG DATABASE_PORT
+ 
+# กำหนด Environment เป็น production
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+
+ENV BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
+
+ENV DATABASE_URL=$DATABASE_URL
+ENV DATABASE_USER=$DATABASE_USER
+ENV DATABASE_PASSWORD=$DATABASE_PASSWORD
+ENV DATABASE_NAME=$DATABASE_NAME
+ENV DATABASE_HOST=$DATABASE_HOST
+ENV DATABASE_PORT=$DATABASE_PORT
  
 # คัดลอก node_modules ที่ติดตั้งแล้วจาก stage 'deps'
 COPY --from=deps /app/node_modules /app/node_modules
@@ -71,8 +95,8 @@ COPY --from=builder /app/prisma ./prisma
 USER nextjs
  
 # กำหนด Port ที่จะให้แอปพลิเคชันทำงาน
-EXPOSE 3001
-ENV PORT 3001
+EXPOSE 3000
+ENV PORT 3000
  
 # คำสั่งสำหรับรันแอปพลิเคชัน
 # 1. รัน Prisma migrations

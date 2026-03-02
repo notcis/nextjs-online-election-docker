@@ -96,10 +96,15 @@ export async function verifyMemberStatus(
 
     const thirtyMinutes = 30 * 60; // อายุ 30 นาที (วินาที)
 
-    (await cookies()).set("voter_session", member.id, {
-      httpOnly: true, // เปลี่ยนเป็น true เพื่อความปลอดภัยสูงสุด (อ่านค่าผ่าน Server Component แทน)
-      secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
-      sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF
+    const sessionData = JSON.stringify({
+      id: member.id,
+      memberCode: member.memberCode,
+    });
+
+    (await cookies()).set("voter_session", sessionData, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: thirtyMinutes,
       path: "/",
     });
@@ -110,6 +115,7 @@ export async function verifyMemberStatus(
       memberId: member.id,
       electionId: election.id,
       maxVotes: election.maxVotes,
+      memberCode: member.memberCode,
     };
   } catch (error) {
     console.error("Verification Error:", error);

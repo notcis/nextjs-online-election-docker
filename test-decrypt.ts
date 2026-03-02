@@ -1,7 +1,7 @@
 import { decryptLineToken } from "./lib/crypto";
 
 const token_1 =
-  "28663b6e1af09fd391988a00d75dddbd:ed11f3ebd1263493dcec38c7a9d22af8";
+  "41482309fb295059ec92cb8a1d96cc41:f8f9ba8b651f1cffce7e7b032fdb362a";
 const token_2 =
   "0526280f69ad1be51e25f555c946c13d:23f2db41b79999f7cc96d899a233accc";
 

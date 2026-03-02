@@ -10,3 +10,5 @@ build
 .env.test.local
 .env.production.local
 .env*.local
+
+test-election-online.txt

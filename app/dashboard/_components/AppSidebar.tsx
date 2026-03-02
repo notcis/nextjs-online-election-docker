@@ -4,39 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client"; // 👈 นำเข้า auth client
 import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  Users,
-  Settings,
-  UserCheck,
-  CheckSquare,
-  LogOut,
-  Loader2,
-  History,
-  BluetoothConnectedIcon,
-} from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { useState } from "react";
-
-const menuItems = [
-  { name: "ภาพรวม (Dashboard)", href: "/dashboard", icon: BarChart3 },
-  {
-    name: "จัดการการเลือกตั้ง",
-    href: "/dashboard/election",
-    icon: CheckSquare,
-  },
-  { name: "รายชื่อผู้สมัคร", href: "/dashboard/candidates", icon: UserCheck },
-  { name: "ฐานข้อมูลสมาชิก", href: "/dashboard/members", icon: Users },
-  {
-    name: "เชื่อมโยงข้อมูล",
-    href: "/dashboard/vote-tally",
-    icon: BluetoothConnectedIcon,
-  },
-  {
-    name: "ประวัติการใช้สิทธิ์",
-    href: "/dashboard/vote-status",
-    icon: History,
-  },
-];
+import { menuItems } from "@/lib/consistent";
 
 export default function AppSidebar() {
   const pathname = usePathname();

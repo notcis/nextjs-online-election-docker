@@ -62,10 +62,10 @@ export default function LoginPage() {
               <Building2 className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">ระบบจัดการหอพัก</CardTitle>
-          <CardDescription>
-            เข้าสู่ระบบเพื่อจัดการอพาร์ตเมนต์และสัญญาเช่า
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            ระบบจัดการเลือกตั้ง
+          </CardTitle>
+          <CardDescription>เข้าสู่ระบบเพื่อจัดการเลือกตั้ง</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleLogin}>

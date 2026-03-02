@@ -82,7 +82,10 @@ export async function importCandidates(
   candidatesData: any[],
 ) {
   try {
-    // ลบข้อมูลเก่า (ที่ปกติ) ออกก่อน เพื่อป้องกันข้อมูลซ้ำ (แต่ไม่ลบ "ไม่ประสงค์ลงคะแนน")
+    await prisma.voteTally.deleteMany({
+      where: { electionId },
+    });
+
     await prisma.candidate.deleteMany({
       where: { electionId, isAbstain: false },
     });
@@ -94,8 +97,12 @@ export async function importCandidates(
     }));
 
     await prisma.candidate.createMany({ data: dataToInsert });
+
     revalidatePath("/dashboard/candidates");
+    revalidatePath("/dashboard/vote-tally"); // สั่งให้หน้า Tally อัปเดตด้วย
+
     return { success: true, count: dataToInsert.length };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return { success: false, error: "ฐานข้อมูลปฏิเสธการบันทึก" };
   }
@@ -103,7 +110,21 @@ export async function importCandidates(
 
 // 4. ลบผู้สมัคร
 export async function deleteCandidate(id: string) {
-  await prisma.candidate.delete({ where: { id } });
-  revalidatePath("/dashboard/candidates");
-  return { success: true };
+  try {
+    // 💡 แก้ไข: ต้องลบ VoteTally ของคนนี้ก่อนเช่นกัน
+    await prisma.voteTally.deleteMany({
+      where: { candidateId: id },
+    });
+
+    // ค่อยลบข้อมูลผู้สมัคร
+    await prisma.candidate.delete({
+      where: { id },
+    });
+
+    revalidatePath("/dashboard/candidates");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete Candidate Error:", error);
+    return { success: false, error: "ไม่สามารถลบได้ อาจมีข้อมูลอื่นผูกอยู่" };
+  }
 }

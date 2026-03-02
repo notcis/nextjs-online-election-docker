@@ -31,18 +31,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-
-const menuItems = [
-  { name: "ภาพรวม (Dashboard)", href: "/dashboard", icon: BarChart3 },
-  {
-    name: "จัดการการเลือกตั้ง",
-    href: "/dashboard/election",
-    icon: CheckSquare,
-  },
-  { name: "รายชื่อผู้สมัคร", href: "/dashboard/candidates", icon: UserCheck },
-  { name: "ฐานข้อมูลสมาชิก", href: "/dashboard/members", icon: Users },
-  { name: "ตั้งค่าระบบ", href: "/dashboard/settings", icon: Settings },
-];
+import { menuItems } from "@/lib/consistent";
 
 export default function Topbar() {
   const pathname = usePathname();

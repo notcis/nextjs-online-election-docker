@@ -102,7 +102,7 @@ export async function importMembersBulk(membersData: any[]) {
     // เนื่องจาก bcrypt ทำงานหนัก เราจะ Hash รวดเดียวด้วย Promise.all
     const membersToInsert = await Promise.all(
       membersData.map(async (m) => {
-        const hashedNationalId = await bcrypt.hash(m.nationalId.toString(), 10);
+        const hashedNationalId = bcrypt.hashSync(m.nationalId.toString(), 10);
         return {
           memberCode: m.memberCode.toString(),
           hashedNationalId,
@@ -121,6 +121,7 @@ export async function importMembersBulk(membersData: any[]) {
 
     revalidatePath("/dashboard/members");
     return { success: true, count: result.count };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return { success: false, error: "เกิดข้อผิดพลาดระหว่างนำเข้าข้อมูล" };
   }

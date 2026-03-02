@@ -41,6 +41,7 @@ export default function ExcelImportModal({
         res = await importMembersBulk(data);
       } else {
         const data = await parseExcelToCandidates(file);
+
         res = await importCandidates(electionId, data);
       }
 
@@ -68,8 +69,9 @@ export default function ExcelImportModal({
         <DialogHeader>
           <DialogTitle>นำเข้าข้อมูลผู้สมัคร (Excel)</DialogTitle>
           <DialogDescription>
-            กรุณาใช้ไฟล์ .xlsx ที่มีคอลัมน์: หมายเลข, ชื่อ, นามสกุล, URL รูปภาพ
-            (ถ้ามี)
+            {type === "member"
+              ? "กรุณาใช้ไฟล์ .xlsx ที่มีคอลัมน์: เลขทะเบียน, เลขบัตร ปชช, อายุ, ภาค, สิทธิ์ (ถ้ามี)"
+              : "กรุณาใช้ไฟล์ .xlsx ที่มีคอลัมน์: หมายเลข, ชื่อ, นามสกุล, URL รูปภาพ (ถ้ามี)"}
           </DialogDescription>
         </DialogHeader>
 

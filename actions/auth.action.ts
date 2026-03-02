@@ -38,7 +38,7 @@ export async function verifyMemberStatus(
     }
 
     // ขั้นตอนที่ 3: ตรวจสอบเลขบัตรประชาชน (เทียบกับ Hash ใน DB)
-    const isNationalIdValid = await bcrypt.compare(
+    const isNationalIdValid = bcrypt.compareSync(
       nationalId,
       member.hashedNationalId,
     );
@@ -94,15 +94,14 @@ export async function verifyMemberStatus(
       };
     }
 
-    const oneHour = 60 * 60; // อายุ 1 ชั่วโมง (วินาที)
+    const thirtyMinutes = 30 * 60; // อายุ 30 นาที (วินาที)
 
     (await cookies()).set("voter_session", member.id, {
       httpOnly: true, // เปลี่ยนเป็น true เพื่อความปลอดภัยสูงสุด (อ่านค่าผ่าน Server Component แทน)
       //secure: process.env.NODE_ENV === "production", // บังคับใช้ HTTPS บน Production
       secure: false,
       sameSite: "strict", // ป้องกันการโจมตีแบบ CSRF
-      //sameSite: "lax", // ป้องกันการโจมตีแบบ CSRF
-      maxAge: oneHour,
+      maxAge: thirtyMinutes,
       path: "/",
     });
 

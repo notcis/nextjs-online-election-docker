@@ -60,7 +60,6 @@ export default function Verification({ year }: { year: string }) {
     try {
       // เรียกใช้ Server Action ของจริง!
       const yearInt = parseInt(year);
-      console.log(yearInt);
 
       const result = await verifyMemberStatus(lineToken!, nationalId, yearInt);
 
@@ -72,7 +71,7 @@ export default function Verification({ year }: { year: string }) {
         router.push(`/${year}/vote`);
       } else if (result.isAlreadyVoted) {
         // กรณีโหวตไปแล้ว: พาไปหน้า Step 5 (Success) เลย
-        router.push(`/${year}/success`);
+        router.push(`/${year}/results`);
       } else {
         // กรณีอื่นๆ (บัตรผิด, ไม่ใช่สมาชิก, หมดเวลา)
         setErrorMsg(result.error || "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ");

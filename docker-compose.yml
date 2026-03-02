@@ -21,7 +21,7 @@ services:
       - "3000:3000"
     networks:
       - mysql_mysql-network
-    image: notcis07/nextjs-election:1.0.1
+    image: notcis07/nextjs-election:1.0.2
 
 # ประกาศ network ที่มีอยู่แล้ว (External Network)
 networks:

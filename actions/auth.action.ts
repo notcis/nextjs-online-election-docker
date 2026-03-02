@@ -103,7 +103,8 @@ export async function verifyMemberStatus(
 
     (await cookies()).set("voter_session", sessionData, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      //secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "strict",
       maxAge: thirtyMinutes,
       path: "/",

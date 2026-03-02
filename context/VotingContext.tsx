@@ -25,6 +25,7 @@ interface VotingState {
   maxVotes: number; // จำนวนที่เลือกได้สูงสุดของปีนี้
   selectedCandidates: SelectedCandidate[]; // รายชื่อผู้สมัครที่เลือก
   isAbstain: boolean; // สถานะ "ไม่ประสงค์ลงคะแนน"
+  memberCode: string | null;
 }
 
 // 3. กำหนด Type สำหรับฟังก์ชันการทำงานต่างๆ
@@ -35,6 +36,7 @@ interface VotingContextType {
   toggleCandidate: (candidate: SelectedCandidate) => void;
   toggleAbstain: (checked: boolean) => void;
   clearVotingData: () => void;
+  setMemberCode: (memberCode: string) => void;
 }
 
 const defaultState: VotingState = {
@@ -43,6 +45,7 @@ const defaultState: VotingState = {
   maxVotes: 0,
   selectedCandidates: [],
   isAbstain: false,
+  memberCode: null,
 };
 
 // 4. สร้าง Context
@@ -52,13 +55,16 @@ const VotingContext = createContext<VotingContextType | undefined>(undefined);
 export function VotingProvider({
   children,
   initialMemberId = null,
+  initialMemberCode = null,
 }: {
   children: React.ReactNode;
   initialMemberId?: string | null;
+  initialMemberCode?: string | null;
 }) {
   const [state, setState] = useState<VotingState>({
     ...defaultState,
     memberId: initialMemberId,
+    memberCode: initialMemberCode,
   });
 
   // ฟังก์ชันเซ็ตข้อมูลการเลือกตั้งตั้งต้น (เรียกตอนหน้า Landing โหลดเสร็จ)
@@ -71,6 +77,10 @@ export function VotingProvider({
 
   const setMemberId = useCallback((memberId: string) => {
     setState((prev) => ({ ...prev, memberId }));
+  }, []);
+
+  const setMemberCode = useCallback((memberCode: string) => {
+    setState((prev) => ({ ...prev, memberCode }));
   }, []);
 
   // ฟังก์ชันหลัก: เลือก/ยกเลิก ผู้สมัคร
@@ -135,6 +145,7 @@ export function VotingProvider({
       toggleCandidate,
       toggleAbstain,
       clearVotingData,
+      setMemberCode,
     }),
     [
       state,
@@ -143,6 +154,7 @@ export function VotingProvider({
       toggleCandidate,
       toggleAbstain,
       clearVotingData,
+      setMemberCode,
     ],
   );
 

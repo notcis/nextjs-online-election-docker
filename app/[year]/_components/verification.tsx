@@ -22,7 +22,7 @@ import { verifyMemberStatus } from "@/actions/auth.action";
 export default function Verification({ year }: { year: string }) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { setMemberId, setElectionInfo } = useVoting();
+  const { setMemberId, setElectionInfo, setMemberCode } = useVoting();
 
   // States
   const [lineToken, setLineToken] = useState<string | null>(null);
@@ -67,6 +67,9 @@ export default function Verification({ year }: { year: string }) {
         // อัปเดต Global State
         setMemberId(result.memberId);
         setElectionInfo(result.electionId!, result.maxVotes!);
+        setMemberCode(result.memberCode!);
+
+
         // เปลี่ยนหน้าไปยังหน้าเลือกตั้ง (Step 3)
         router.push(`/${year}/vote`);
       } else if (result.isAlreadyVoted) {

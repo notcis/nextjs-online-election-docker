@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Clock, BarChart3, Users, Crown } from "lucide-react";
 import CountdownTimer from "../../vote/_components/CountdownTimer";
+import { date } from "better-auth";
 
 export default function Results({ year }: { year: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +51,11 @@ export default function Results({ year }: { year: string }) {
           <p className="text-sm text-gray-500 mt-2 mb-6">
             ผลการนับคะแนนจะแสดงอัตโนมัติ
             <br />
+            หลังจากปิดการลงคะแนน
+          </p>
+     {/*      <p className="text-sm text-gray-500 mt-2 mb-6">
+            ผลการนับคะแนนจะแสดงอัตโนมัติ
+            <br />
             หลังจากปิดการลงคะแนนในเวลา{" "}
             {data.endTime.toLocaleTimeString("th-TH", {
               hour: "2-digit",
@@ -57,7 +63,7 @@ export default function Results({ year }: { year: string }) {
               timeZone: "UTC",
             })}{" "}
             น.
-          </p>
+          </p> */}
           <div className="bg-gray-100 rounded-lg p-3">
             <CountdownTimer endTime={data.endTime} />
           </div>

@@ -6,10 +6,20 @@ export default async function YearLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const memberId = cookieStore.get("voter_session")?.value || null;
+  const sessionCookie = (await cookies()).get("voter_session")?.value;
+
+  let memberId = null;
+  let memberCode = null;
+
+  if (sessionCookie) {
+    // แปลง String กลับเป็น Object
+    const sessionData = JSON.parse(sessionCookie);
+
+    memberId = sessionData.memberId;
+    memberCode = sessionData.memberCode;
+  }
   return (
-    <VotingProvider initialMemberId={memberId}>
+    <VotingProvider initialMemberId={memberId} initialMemberCode={memberCode}>
       {/* ส่วนอื่นๆ เช่น Header, Container */}
       {children}
     </VotingProvider>
